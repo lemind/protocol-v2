@@ -1,0 +1,35 @@
+# Related-party test of dependency-preflight's paid explanations (testnet only). It only reads lockfiles and
+# manifests: nothing from this repository is installed, built or run. Drift's own workflows are removed on this branch.
+name: Dependency preflight (paid explanations, related-party test)
+on:
+  push:
+    branches: [preflight-demo]
+permissions:
+  contents: write # the purchase record on the preflight branch
+concurrency:
+  group: dependency-preflight-${{ github.repository }}
+  cancel-in-progress: false
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - id: preflight
+        uses: lemind/dependency-preflight@067085460776661bf3f8f98f538b5f0658bf439a
+        continue-on-error: true # drift sdk/ is blocked by advisories; this run is about the explanations
+        env:
+          TELEGRAPH_EVM_PRIVATE_KEY: ${{ secrets.TELEGRAPH_EVM_PRIVATE_KEY }}
+        with:
+          path: sdk
+          max-purchases: "3"
+          case-label: "Related-party test: paid upgrade explanations from miner 7314 (testnet), drift-labs/protocol-v2 at 13e8e9b"
+      - name: Report
+        env:
+          VERDICT: ${{ steps.preflight.outputs.verdict }}
+          SPENT: ${{ steps.preflight.outputs.spent-usdc }}
+        run: |
+          echo "verdict=$VERDICT spent-usdc=$SPENT"
+          test -n "$VERDICT"
