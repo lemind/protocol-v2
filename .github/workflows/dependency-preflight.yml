@@ -18,13 +18,14 @@ jobs:
         with:
           persist-credentials: false
       - id: preflight
-        uses: lemind/dependency-preflight@067085460776661bf3f8f98f538b5f0658bf439a
+        uses: lemind/dependency-preflight@2b25fabb525192e98ee71285f43c785258b09e8f
         continue-on-error: true # drift sdk/ is blocked by advisories; this run is about the explanations
         env:
           TELEGRAPH_EVM_PRIVATE_KEY: ${{ secrets.TELEGRAPH_EVM_PRIVATE_KEY }}
         with:
           path: sdk
-          max-purchases: "3"
+          max-purchases: "4"
+          budget-cap-usdc: "0.06"
           case-label: "Related-party test: paid upgrade explanations from miner 7314 (testnet), drift-labs/protocol-v2 at 13e8e9b"
       - name: Report
         env:
